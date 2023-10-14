@@ -50,9 +50,10 @@ public class TaskController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@RequestBody TaskModel taskModel, HttpServletRequest request, @PathVariable UUID id) {
+  public ResponseEntity<?> update(@RequestBody TaskModel taskModel, HttpServletRequest request, @PathVariable UUID id) throws Exception {
 
     var task = this.taskRepository.findById((UUID) id).orElse(null);
+
 
     if (task == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
