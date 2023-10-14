@@ -1,8 +1,11 @@
 package br.com.kamatech.todolist.task;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,11 +21,19 @@ public class TaskController {
   private ITaskRepository taskRepository;
   
   @PostMapping("/")
-  public TaskModel create(@RequestBody TaskModel taskModel, HttpServletRequest request) {
-    System.out.println("Chegou no controller " + request.getAttribute("idUser"));
+  public ResponseEntity<?> create(@RequestBody TaskModel taskModel, HttpServletRequest request) {
     var idUser = request.getAttribute("idUser");
     taskModel.setIdUser((UUID) idUser);
+
+    var currentDate = LocalDateTime.now();
+    var initialDate = taskModel.getStartAt();
+    var finalDate = taskModel.getEndAt();
+    if (currentDate.isAfter(initialDate) && initialDate.isAfter(finalDate)) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body("A data de início deve ser maior que a data atual e a data final deve ser maior que a data de início");
+    }
+
     var task = this.taskRepository.save(taskModel);
-    return task;
+    return ResponseEntity.status(HttpStatus.OK).body(task);
   }
 }
